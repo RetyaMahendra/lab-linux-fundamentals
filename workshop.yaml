@@ -22,12 +22,8 @@ spec:
         url: https://github.com/RetyaMahendra/lab-linux-fundamentals
         ref: main
       includePaths:
-      - /instructions/**
-      - /resources/**
-      - /config.yaml
-      - /hugo.toml
+      - /workshop/**
       - /README.md
-      path: workshop
 
   session:
     namespaces:
