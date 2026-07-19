@@ -18,7 +18,9 @@ spec:
   workshop:
     image: ghcr.io/educates/educates-base-environment:3.7.3
     files:
-    - path: .
+    - git:
+        url: https://github.com/RetyaMahendra/lab-linux-fundamentals
+        ref: origin/main
 
   session:
     namespaces:
