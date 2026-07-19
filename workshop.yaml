@@ -16,7 +16,7 @@ spec:
   duration: 240m
 
   workshop:
-    image: ubuntu:24.04
+    image: base-environment:*
     files:
     - git:
         url: https://github.com/RetyaMahendra/lab-linux-fundamentals
