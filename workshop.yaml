@@ -15,12 +15,24 @@ spec:
 
   duration: 240m
 
-  workshop:
+  publish:
     image: ghcr.io/educates/educates-base-environment:3.7.3
     files:
-    - git:
-        url: https://github.com/RetyaMahendra/lab-linux-fundamentals
-        ref: origin/main
+    - directory:
+        path: .
+      includePaths:
+      - /instructions/**
+      - /resources/**
+      - /README.md
+
+  workshop:
+    files:
+    - image:
+        url: ghcr.io/educates/educates-base-environment:3.7.3
+      includePaths:
+      - /instructions/**
+      - /resources/**
+      - /README.md
 
   session:
     namespaces:
