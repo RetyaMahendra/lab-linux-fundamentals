@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+# =============================================================================
+# Examiner Test: check-htop-installed
+# =============================================================================
+# Verifies that htop is installed (Module 5 challenge).
+# Exit 0 = PASS, non-zero = FAIL
+# =============================================================================
+
+set -uo pipefail
+
+# Check 1: dpkg reports htop as installed
+if dpkg -l htop 2>/dev/null | grep -q "^ii"; then
+    VERSION=$(dpkg -l htop | grep "^ii" | awk '{print $3}')
+    echo "PASS: htop is installed (version: $VERSION)"
+    exit 0
+fi
+
+# Check 2: Binary exists anywhere in PATH
+if command -v htop &>/dev/null; then
+    echo "PASS: htop binary found at $(which htop)"
+    exit 0
+fi
+
+echo "FAIL: htop is not installed."
+echo "      Complete the Module 5 challenge: sudo apt install -y htop"
+exit 1

@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+# =============================================================================
+# Examiner Test: check-sudo-config
+# =============================================================================
+# Verifies that the 'student' user has sudo access configured.
+# Checks group membership and validates sudo functionality.
+# Exit 0 = PASS, non-zero = FAIL
+# =============================================================================
+
+set -uo pipefail
+
+SUDO_USER="${1:-student}"
+
+# Check 1: User is in the sudo group
+if id "$SUDO_USER" 2>/dev/null | grep -qE "sudo|wheel"; then
+    echo "PASS: User '$SUDO_USER' is in the sudo/wheel group"
+else
+    echo "FAIL: User '$SUDO_USER' is NOT in the sudo group"
+    echo "      Run: sudo usermod -aG sudo $SUDO_USER"
+    exit 1
+fi
+
+# Check 2: /etc/sudoers exists and is not broken
+if sudo -n visudo --check &>/dev/null 2>&1; then
+    echo "PASS: /etc/sudoers syntax is valid"
+else
+    # visudo --check might not exist on all versions
+    if [ -f /etc/sudoers ]; then
+        echo "PASS: /etc/sudoers file exists"
+    else
+        echo "FAIL: /etc/sudoers is missing or broken"
+        exit 1
+    fi
+fi
+
+# Check 3: sudo can run basic command (if we're already running as SUDO_USER)
+# This test runs AS the student user (via examiner), so sudo -n should work
+if sudo -n whoami &>/dev/null 2>&1; then
+    echo "PASS: sudo can be used without a password in this session"
+else
+    echo "WARN: sudo requires a password (expected in production environments)"
+    echo "      This is acceptable — the check confirms sudo is configured."
+fi
+
+echo "INFO: Sudo configuration for '$SUDO_USER':"
+sudo -l -U "$SUDO_USER" 2>/dev/null | head -10 || true
+
+exit 0

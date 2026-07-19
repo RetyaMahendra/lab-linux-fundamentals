@@ -1,0 +1,4 @@
+# Workshop diagram images live here.
+# Add PNG/SVG/JPEG images referenced from instruction markdown files.
+# Example usage in Hugo renderer:
+#   ![Architecture diagram]({{<baseurl>}}/images/linux-architecture.png)

@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+# =============================================================================
+# Examiner Test: check-nginx-installed
+# =============================================================================
+# Checks that the nginx package is installed via dpkg.
+# Exit 0 = PASS, non-zero = FAIL
+# =============================================================================
+
+set -uo pipefail
+
+# Method 1: Check dpkg status (most reliable)
+if dpkg -l nginx 2>/dev/null | grep -q "^ii"; then
+    echo "PASS: nginx is installed (dpkg reports: installed)"
+    exit 0
+fi
+
+# Method 2: Check if binary exists
+if command -v nginx &>/dev/null; then
+    echo "PASS: nginx binary found at $(which nginx)"
+    exit 0
+fi
+
+echo "FAIL: nginx is not installed. Run: sudo apt install -y nginx"
+exit 1

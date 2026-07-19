@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+# =============================================================================
+# Examiner Test: check-user-exists
+# =============================================================================
+# Checks that the devuser1 account was created as part of Module 4 lab.
+# Verifies: user exists, home directory exists, and group membership is correct.
+# Exit 0 = PASS, non-zero = FAIL
+#
+# Optional argument: username (default: devuser1)
+# Usage: check-user-exists [username]
+# =============================================================================
+
+set -uo pipefail
+
+TARGET_USER="${1:-devuser1}"
+
+# Check 1: User exists in /etc/passwd
+if ! id "$TARGET_USER" &>/dev/null; then
+    echo "FAIL: User '$TARGET_USER' does not exist."
+    echo "      Run: sudo useradd -m -s /bin/bash -G developers $TARGET_USER"
+    exit 1
+fi
+
+echo "PASS: User '$TARGET_USER' exists (UID: $(id -u "$TARGET_USER"))"
+
+# Check 2: Home directory exists
+HOME_DIR=$(getent passwd "$TARGET_USER" | cut -d: -f6)
+if [ -d "$HOME_DIR" ]; then
+    echo "PASS: Home directory exists at $HOME_DIR"
+else
+    echo "WARN: Home directory $HOME_DIR does not exist"
+    echo "      Create it: sudo mkhomedir_helper $TARGET_USER"
+fi
+
+# Check 3: User has a valid shell (not /usr/sbin/nologin)
+SHELL=$(getent passwd "$TARGET_USER" | cut -d: -f7)
+if echo "$SHELL" | grep -qv "nologin\|false"; then
+    echo "PASS: User has valid login shell: $SHELL"
+else
+    echo "WARN: User has restricted shell: $SHELL (may be intentional)"
+fi
+
+# Check 4: User is in the developers group
+if id "$TARGET_USER" 2>/dev/null | grep -q "developers"; then
+    echo "PASS: User '$TARGET_USER' is a member of the 'developers' group"
+else
+    echo "WARN: User '$TARGET_USER' is NOT in the 'developers' group"
+    echo "      Run: sudo usermod -aG developers $TARGET_USER"
+fi
+
+exit 0

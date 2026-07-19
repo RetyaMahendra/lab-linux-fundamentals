@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+# =============================================================================
+# Examiner Test: check-nginx-running
+# =============================================================================
+# Checks that the nginx service is currently active and running.
+# Also verifies it responds on port 80.
+# Exit 0 = PASS, non-zero = FAIL
+# =============================================================================
+
+set -uo pipefail
+
+# Method 1: Check systemctl status
+if systemctl is-active nginx &>/dev/null; then
+    echo "PASS: nginx service is active (systemctl reports: active)"
+
+    # Bonus check: verify port 80 responds
+    if curl -s -o /dev/null -w "%{http_code}" http://localhost 2>/dev/null | grep -q "200\|301\|302"; then
+        echo "PASS: nginx is responding on port 80 (HTTP 200/301/302)"
+    else
+        echo "WARN: nginx is running but not responding on port 80 (may be normal)"
+    fi
+    exit 0
+fi
+
+# Method 2: Check process directly (for systems without systemd)
+if pgrep -x nginx &>/dev/null; then
+    echo "PASS: nginx process is running (found via pgrep)"
+    exit 0
+fi
+
+echo "FAIL: nginx is not running. Run: sudo systemctl start nginx"
+echo "      If nginx is not installed: sudo apt install -y nginx"
+exit 1

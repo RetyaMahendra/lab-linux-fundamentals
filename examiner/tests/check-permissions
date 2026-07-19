@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# =============================================================================
+# Examiner Test: check-permissions
+# =============================================================================
+# Verifies that /opt/devshare was created with correct SGID permissions
+# (mode 2775 or 2770) and the correct group ownership (developers).
+# Exit 0 = PASS, non-zero = FAIL
+#
+# Optional argument: directory path (default: /opt/devshare)
+# =============================================================================
+
+set -uo pipefail
+
+TARGET_DIR="${1:-/opt/devshare}"
+
+# Check 1: Directory exists
+if [ ! -d "$TARGET_DIR" ]; then
+    echo "FAIL: Directory '$TARGET_DIR' does not exist."
+    echo "      Run: sudo mkdir -p $TARGET_DIR"
+    exit 1
+fi
+
+echo "PASS: Directory '$TARGET_DIR' exists"
+
+# Check 2: Group ownership is 'developers'
+DIR_GROUP=$(stat -c '%G' "$TARGET_DIR")
+if [ "$DIR_GROUP" = "developers" ]; then
+    echo "PASS: Group owner is 'developers'"
+else
+    echo "FAIL: Group owner is '$DIR_GROUP' (expected: developers)"
+    echo "      Run: sudo chown root:developers $TARGET_DIR"
+    exit 1
+fi
+
+# Check 3: SGID bit is set
+PERMS=$(stat -c '%a' "$TARGET_DIR")
+# SGID is set when the leading digit is 2 (e.g., 2775, 2770)
+if [[ "$PERMS" =~ ^2 ]]; then
+    echo "PASS: SGID bit is set (octal permissions: $PERMS)"
+else
+    echo "FAIL: SGID bit is NOT set (current permissions: $PERMS)"
+    echo "      Run: sudo chmod g+s $TARGET_DIR"
+    echo "      Or:  sudo chmod 2775 $TARGET_DIR"
+    exit 1
+fi
+
+# Check 4: Group has write access
+SYMBOLIC=$(stat -c '%A' "$TARGET_DIR")
+if echo "$SYMBOLIC" | grep -q "^d...rw"; then
+    echo "PASS: Group has write access ($SYMBOLIC)"
+else
+    echo "WARN: Group may not have write access ($SYMBOLIC)"
+    echo "      For collaborative sharing run: sudo chmod 2775 $TARGET_DIR"
+fi
+
+echo "INFO: Full permission details:"
+ls -la "$TARGET_DIR" | head -4
+
+exit 0

@@ -1,0 +1,13 @@
+pathways:
+  default: main
+  paths:
+    main:
+      title: "Linux System Administration Fundamentals"
+      modules:
+      - 01-linux-fundamentals
+      - 02-command-line
+      - 03-filesystem
+      - 04-users
+      - 05-packages
+      - 06-processes
+      - 07-networking

@@ -1,0 +1,10 @@
+# workshop/hugo.toml
+# Educates Hugo renderer configuration.
+# This tells Hugo to find content pages in the instructions/ directory
+# instead of the default content/ directory.
+
+contentDir = "instructions"
+baseURL    = "/"
+
+[markup.goldmark.renderer]
+  unsafe = true

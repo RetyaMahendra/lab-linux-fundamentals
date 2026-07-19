@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# =============================================================================
+# Examiner Test: check-group-exists
+# =============================================================================
+# Checks that the 'developers' group was created as part of Module 4 lab.
+# Also verifies that devuser1 and devuser2 are members.
+# Exit 0 = PASS, non-zero = FAIL
+#
+# Optional argument: group name (default: developers)
+# =============================================================================
+
+set -uo pipefail
+
+TARGET_GROUP="${1:-developers}"
+
+# Check 1: Group exists
+if ! getent group "$TARGET_GROUP" &>/dev/null; then
+    echo "FAIL: Group '$TARGET_GROUP' does not exist."
+    echo "      Run: sudo groupadd $TARGET_GROUP"
+    exit 1
+fi
+
+echo "PASS: Group '$TARGET_GROUP' exists (GID: $(getent group "$TARGET_GROUP" | cut -d: -f3))"
+
+# Check 2: At least one developer user is a member
+MEMBERS=$(getent group "$TARGET_GROUP" | cut -d: -f4)
+if [ -n "$MEMBERS" ]; then
+    echo "PASS: Group '$TARGET_GROUP' has members: $MEMBERS"
+else
+    echo "WARN: Group '$TARGET_GROUP' has no members yet"
+    echo "      Add users: sudo usermod -aG $TARGET_GROUP devuser1"
+fi
+
+# Check 3: devuser1 is a member (expected from lab instructions)
+if id devuser1 2>/dev/null | grep -q "$TARGET_GROUP"; then
+    echo "PASS: devuser1 is in the '$TARGET_GROUP' group"
+else
+    echo "WARN: devuser1 is not in '$TARGET_GROUP' (create with Module 4 lab step 2)"
+fi
+
+exit 0

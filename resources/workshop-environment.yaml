@@ -1,0 +1,13 @@
+apiVersion: training.educates.dev/v1beta1
+kind: WorkshopEnvironment
+metadata:
+  name: lab-linux-sysadmin
+spec:
+  workshop:
+    name: lab-linux-sysadmin
+  request:
+    enabled: false
+  session:
+    budget: medium
+    namespaces:
+      role: view

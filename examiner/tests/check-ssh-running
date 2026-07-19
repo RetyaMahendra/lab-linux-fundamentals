@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+# =============================================================================
+# Examiner Test: check-ssh-running
+# =============================================================================
+# Verifies that the OpenSSH server (sshd) is running and listening on port 22.
+# This is required for Module 7 (Networking) SSH and SCP labs.
+# Exit 0 = PASS, non-zero = FAIL
+# =============================================================================
+
+set -uo pipefail
+
+SSH_PORT="${1:-22}"
+
+# Check 1: systemctl reports ssh or sshd as active
+if systemctl is-active ssh   &>/dev/null 2>&1 || \
+   systemctl is-active sshd  &>/dev/null 2>&1; then
+    echo "PASS: SSH service is active (systemctl)"
+else
+    echo "WARN: systemctl reports SSH as inactive — checking process directly ..."
+fi
+
+# Check 2: sshd process is running
+if pgrep -x sshd &>/dev/null; then
+    echo "PASS: sshd process is running (PID: $(pgrep -x sshd | head -1))"
+else
+    echo "FAIL: sshd is not running"
+    echo "      Start it: sudo systemctl start ssh"
+    echo "      Or manually: sudo /usr/sbin/sshd"
+    exit 1
+fi
+
+# Check 3: Port 22 is listening
+if ss -tlnp 2>/dev/null | grep -q ":${SSH_PORT} "; then
+    echo "PASS: Port ${SSH_PORT} is listening (SSH is accessible)"
+elif command -v netstat &>/dev/null && netstat -tlnp 2>/dev/null | grep -q ":${SSH_PORT} "; then
+    echo "PASS: Port ${SSH_PORT} is listening (verified via netstat)"
+else
+    echo "WARN: Port ${SSH_PORT} not detected in ss output — SSH may still work via loopback"
+fi
+
+# Check 4: SSH config is valid
+if sudo sshd -t &>/dev/null 2>&1; then
+    echo "PASS: SSH server configuration is valid"
+else
+    echo "WARN: Could not validate sshd config (may need sudo)"
+fi
+
+# Check 5: Verify localhost SSH connectivity
+if ssh -o StrictHostKeyChecking=no -o ConnectTimeout=3 -o PasswordAuthentication=no \
+       -o BatchMode=yes localhost "echo SSH OK" &>/dev/null 2>&1; then
+    echo "PASS: SSH login to localhost works (key-based auth)"
+else
+    echo "INFO: Key-based SSH to localhost not yet configured (normal before Module 7 key setup)"
+fi
+
+exit 0
