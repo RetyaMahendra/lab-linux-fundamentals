@@ -1,4 +1,5 @@
 baseURL = "/"
+uglyURLs = true
 
 [markup.goldmark.renderer]
   unsafe = true
