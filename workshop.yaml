@@ -16,7 +16,8 @@ spec:
   duration: 240m
 
   workshop:
-    image: base-environment:*
+    # image: base-environment:*
+    image: ret97/base-environment-ubuntu:ubuntu24.04
     files:
     - git:
         url: https://github.com/RetyaMahendra/lab-linux-fundamentals
@@ -31,6 +32,5 @@ spec:
     applications:
       terminal:
         enabled: true
-        layout: split
       editor:
         enabled: true
